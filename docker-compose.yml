@@ -1,0 +1,46 @@
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: olivia_db
+    environment:
+      POSTGRES_DB: menu
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: c2exy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d menu"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: olivia_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - media_data:/app/media
+      - static_data:/app/static
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=django-insecure-vzsi27*6f5zd9(a2^kvli#z2=&v+252*8mk+gv*bg@5+ajctbr
+      - DEBUG=True
+      - NAME=menu
+      - USER=postgres
+      - PASSWORD=c2exy
+      - HOST=db
+      - PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  media_data:
+  static_data:

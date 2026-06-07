@@ -1,0 +1,21 @@
+[project]
+name = "olivia-backend"
+version = "0.1.0"
+description = "Backend for Olivia Pizza - Django REST API"
+authors = [
+    {name = "artem"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "django>=5.0,<6.0",
+    "djangorestframework>=3.14.0",
+    "drf-polymorphic>=2.1.1,<3.0.0",
+    "drf-spectacular>=0.29.0,<0.30.0",
+    "psycopg2-binary>=2.9.9",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
