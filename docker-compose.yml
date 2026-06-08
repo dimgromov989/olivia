@@ -1,0 +1,97 @@
+services:
+  # MinIO Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: olivia_minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Web Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Создаёт bucket при запуске
+  minio-create-bucket:
+    image: minio/mc:latest
+    container_name: olivia_minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set myminio http://minio:9000 minioadmin minioadmin123;
+      mc mb -p myminio/olivia-pizza-media;
+      mc anonymous set public myminio/olivia-pizza-media;
+      exit 0;
+      "
+
+  # PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: olivia_db
+    environment:
+      POSTGRES_DB: menu
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: c2exy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d menu"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Django Web
+  web:
+    build: .
+    container_name: olivia_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - static_data:/app/static
+    ports:
+      - "8000:8000"
+    environment:
+      # Django
+      - SECRET_KEY=django-insecure-vzsi27*6f5zd9(a2^kvli#z2=&v+252*8mk+gv*bg!5+ajctbr
+      - DEBUG=True
+      
+      # Database
+      - NAME=menu
+      - USER=postgres
+      - PASSWORD=c2exy
+      - HOST=db
+      - PORT=5432
+      
+      # MinIO - ВНУТРЕННИЙ URL (для подключения Django к MinIO)
+      - USE_S3=True
+      - AWS_STORAGE_BUCKET_NAME=olivia-pizza-media
+      - AWS_S3_REGION_NAME=us-east-1
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin123
+      - AWS_S3_ENDPOINT_URL=http://minio:9000
+      
+      # MinIO - ВНЕШНИЙ URL (для формирования ссылок на файлы)
+      - AWS_S3_CUSTOM_DOMAIN=localhost:9000/olivia-pizza-media
+      
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  minio_data:
+  static_data:
