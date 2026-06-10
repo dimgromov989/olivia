@@ -1,7 +1,6 @@
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics
-from rest_framework.response import Response
 
 from .models import Category, Product
 from .serializers import CategorySerializer, MenuSerializer, ProductDetailSerializer
@@ -10,7 +9,7 @@ from .serializers import CategorySerializer, MenuSerializer, ProductDetailSerial
 @extend_schema(
     summary="Получить список категорий",
     description="Возвращает все активные категории",
-    tags=["Menu"],
+    tags=["Меню"],
 )
 class CategoryListView(generics.ListAPIView):
     """
@@ -28,7 +27,7 @@ class CategoryListView(generics.ListAPIView):
 @extend_schema(
     summary="Получить всё меню",
     description="Возвращает все активные категории с их товарами и вариантами",
-    tags=["Menu"],
+    tags=["Меню"],
 )
 class MenuListView(generics.ListAPIView):
     """
@@ -47,7 +46,7 @@ class MenuListView(generics.ListAPIView):
 @extend_schema(
     summary="Получить товар",
     description="Возвращает детали одного товара с его вариантами",
-    tags=["Menu"],
+    tags=["Меню"],
     parameters=[
         OpenApiParameter(
             name="slug",

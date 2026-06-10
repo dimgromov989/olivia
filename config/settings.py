@@ -26,6 +26,8 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "storages",
     "cms",
+    "users",
+    "cart",
 ]
 
 MIDDLEWARE = [
@@ -166,5 +168,7 @@ SPECTACULAR_SETTINGS = {
         "email": "support@olivia-pizza.ru",
     },
 }
+
+AUTH_USER_MODEL = "users.User"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
