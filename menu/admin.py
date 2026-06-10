@@ -1,33 +1,32 @@
 from django.contrib import admin
-from .models import Category, Product, ProductVariant
 
-
-class ProductVariantInline(admin.TabularInline):
-    model = ProductVariant
-    extra = 1
-    fields = ['name', 'crm_id', 'price', 'is_active']
-    verbose_name = "Вариант (размер/модификатор)"
-    verbose_name_plural = "Варианты товара"
+from .models import Category, Product
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'crm_id', 'sort_order', 'is_active']
-    list_editable = ['sort_order', 'is_active']
-    prepopulated_fields = {'slug': ('name',)}
-    search_fields = ['name', 'crm_id']
+    list_display = ["name", "crm_id", "sort_order", "is_active", "image"]
+    list_editable = ["sort_order", "is_active"]
+    list_filter = ["is_active"]
+    search_fields = ["name", "crm_id"]
+    prepopulated_fields = {"slug": ("name",)}
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'crm_id', 'is_active', 'is_out_of_stock']
-    list_filter = ['category', 'is_active', 'is_out_of_stock']
-    search_fields = ['name', 'crm_id', 'description']
-    prepopulated_fields = {'slug': ('name',)}
-    inlines = [ProductVariantInline] 
-
-
-@admin.register(ProductVariant)
-class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ['name', 'product', 'crm_id', 'price', 'is_active']
-    list_filter = ['is_active', 'product__category']
-    search_fields = ['name', 'product__name', 'crm_id']
+    list_display = [
+        "name",
+        "category",
+        "price",
+        "old_price",
+        "quantity",
+        "weight",
+        "is_available",
+        "is_out_of_stock",
+        "is_active",
+    ]
+    list_filter = ["category", "is_active", "is_available", "is_out_of_stock"]
+    search_fields = ["name", "crm_id", "description"]
+    prepopulated_fields = {"slug": ("name",)}
+    list_editable = ["is_available", "is_active", "is_out_of_stock"]
+    list_per_page = 20
